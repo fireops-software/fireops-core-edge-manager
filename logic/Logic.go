@@ -106,7 +106,7 @@ func (l *Logic) GetDeviceVersion(ctx context.Context, deviceId string) (domain.D
 }
 
 // GetContainerLogs implements ILogic.
-func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, containerId string) ([]domain.ContainerLogEntry, error) {
+func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, containerId string, len uint) ([]domain.ContainerLogEntry, error) {
 	return doWsRequest[[]domain.ContainerLogEntry](
 		l.devices,
 		deviceId,
@@ -115,6 +115,7 @@ func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, container
 			MsgType: ws.TYPE_GET_CONTAINER_LOGS,
 			Body: ws.GetContainerLogsRequest{
 				ContainerId: containerId,
+				Len:         len,
 			},
 		},
 	)

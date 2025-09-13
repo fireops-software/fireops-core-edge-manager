@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/fireops-software/fireops-core-edge-manager/domain"
 	"github.com/uoul/go-common/servemux"
@@ -40,10 +41,15 @@ func (a *Api) getContainers() servemux.HandlerFunc[any] {
 // GET container logs
 func (a *Api) getContainerLogs() servemux.HandlerFunc[any] {
 	return func(ctx *servemux.HttpCtx[any]) {
+		len, err := strconv.ParseUint(ctx.GetQueryParam("len"), 10, 32)
+		if err != nil {
+			len = 100
+		}
 		logs, err := a.logic.GetContainerLogs(
 			ctx.Context(),
 			ctx.GetUrlParam("deviceId"),
 			ctx.GetUrlParam("containerId"),
+			uint(len),
 		)
 		if err != nil {
 			ctx.Error(err)

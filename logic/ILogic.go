@@ -17,6 +17,6 @@ type ILogic interface {
 	GetDeviceVersion(ctx context.Context, deviceId string) (domain.DeviceVersion, error)
 	GetContainers(ctx context.Context, deviceId string) ([]container.Summary, error)
 	DeployContainers(ctx context.Context, deviceId string, containerConfig []domain.ServiceDefinition) ([]container.Summary, error)
-	GetContainerLogs(ctx context.Context, deviceId string, containerId string) ([]domain.ContainerLogEntry, error)
+	GetContainerLogs(ctx context.Context, deviceId string, containerId string, len uint) ([]domain.ContainerLogEntry, error)
 	DeleteAllContainers(ctx context.Context, deviceId string) error
 }
