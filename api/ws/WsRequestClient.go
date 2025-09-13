@@ -2,6 +2,7 @@ package ws
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 
 	appError "github.com/fireops-software/fireops-core-edge-manager/error"
@@ -87,7 +88,7 @@ func (w *WsRequestClient) readWs() {
 			return
 		default:
 			// Read Response
-			resp := Response[any]{}
+			resp := Response[json.RawMessage]{}
 			if err := w.conn.ReadJSON(&resp); err != nil {
 				w.stop()
 				w.replyAll(async.NewErrorActionResult[IResponse](

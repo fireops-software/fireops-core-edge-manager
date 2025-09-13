@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/fireops-software/fireops-core-edge-manager/api/ws"
 	"github.com/fireops-software/fireops-core-edge-manager/dal"
 	"github.com/fireops-software/fireops-core-edge-manager/domain"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/uoul/go-common/log"
 
@@ -65,28 +67,89 @@ func (l *Logic) GetDeviceIdentityFromToken(ctx context.Context, token string) (d
 
 // DeleteAllContainers implements ILogic.
 func (l *Logic) DeleteAllContainers(ctx context.Context, deviceId string) error {
-	// Send destroy message
-	panic("unimplemented")
+	_, err := doWsRequest[any](
+		l.devices,
+		deviceId,
+		&ws.Request[ws.DestroyContainersRequest]{
+			MsgId:   uuid.NewString(),
+			MsgType: ws.TYPE_DESTROY,
+			Body:    ws.DestroyContainersRequest{},
+		},
+	)
+	return err
 }
 
 // DeployContainers implements ILogic.
 func (l *Logic) DeployContainers(ctx context.Context, deviceId string, containerConfig []domain.ServiceDefinition) ([]container.Summary, error) {
-	panic("unimplemented")
+	return doWsRequest[[]container.Summary](
+		l.devices,
+		deviceId,
+		&ws.Request[ws.InstallContainersRequest]{
+			MsgId:   uuid.NewString(),
+			MsgType: ws.TYPE_INSTALL,
+			Body:    containerConfig,
+		},
+	)
 }
 
 // GetAgentVersion implements ILogic.
 func (l *Logic) GetDeviceVersion(ctx context.Context, deviceId string) (domain.DeviceVersion, error) {
-	panic("unimplemented")
+	return doWsRequest[domain.DeviceVersion](
+		l.devices,
+		deviceId,
+		&ws.Request[ws.GetAgentVersionRequest]{
+			MsgId:   uuid.NewString(),
+			MsgType: ws.TYPE_GET_AGENT_VERSION,
+			Body:    ws.GetAgentVersionRequest{},
+		},
+	)
 }
 
 // GetContainerLogs implements ILogic.
 func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, containerId string) ([]domain.ContainerLogEntry, error) {
-	panic("unimplemented")
+	return doWsRequest[[]domain.ContainerLogEntry](
+		l.devices,
+		deviceId,
+		&ws.Request[ws.GetContainerLogsRequest]{
+			MsgId:   uuid.NewString(),
+			MsgType: ws.TYPE_GET_CONTAINER_LOGS,
+			Body: ws.GetContainerLogsRequest{
+				ContainerId: containerId,
+			},
+		},
+	)
 }
 
 // GetContainers implements ILogic.
 func (l *Logic) GetContainers(ctx context.Context, deviceId string) ([]container.Summary, error) {
-	panic("unimplemented")
+	return doWsRequest[[]container.Summary](
+		l.devices,
+		deviceId,
+		&ws.Request[ws.GetContainersRequest]{
+			MsgId:   uuid.NewString(),
+			MsgType: ws.TYPE_GET_CONTAINERS,
+			Body:    ws.GetContainersRequest{},
+		},
+	)
+}
+
+func doWsRequest[T any](devices map[string]ws.WsRequestClient, deviceId string, req ws.IRequest) (T, error) {
+	// Check if device is registered
+	device, exists := devices[deviceId]
+	if !exists {
+		return *new(T), appError.NewErrNotFound("device with id %s not found", deviceId)
+	}
+	// Send deployment request
+	resp := <-device.Send(req)
+	if resp.Error != nil {
+		return *new(T), resp.Error
+	}
+	// Convert Response
+	respBody := *new(T)
+	if err := json.Unmarshal(resp.Result.GetBody(), &respBody); err != nil {
+		return *new(T), appError.NewErrDataParsing("failed to parse data - %v", err)
+	}
+	return respBody, nil
 }
 
 func NewLogic(logger log.ILogger, opts ...func(*Logic)) ILogic {

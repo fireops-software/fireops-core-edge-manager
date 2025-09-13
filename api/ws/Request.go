@@ -1,9 +1,17 @@
 package ws
 
+import "encoding/json"
+
 type Request[T any] struct {
 	MsgId   string
 	MsgType string
 	Body    T
+}
+
+// GetBody implements IRequest.
+func (r *Request[T]) GetBody() json.RawMessage {
+	data, _ := json.Marshal(r.Body)
+	return data
 }
 
 // GetMsgId implements IRequest.

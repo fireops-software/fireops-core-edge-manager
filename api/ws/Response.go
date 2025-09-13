@@ -1,10 +1,18 @@
 package ws
 
+import "encoding/json"
+
 type Response[T any] struct {
 	MsgId   string
 	MsgType string
 	Error   error
 	Body    T
+}
+
+// GetBody implements IResponse.
+func (r *Response[T]) GetBody() json.RawMessage {
+	data, _ := json.Marshal(r.Body)
+	return data
 }
 
 // GetError implements IResponse.
