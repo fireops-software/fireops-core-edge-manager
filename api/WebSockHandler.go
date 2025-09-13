@@ -49,17 +49,12 @@ func (a *Api) handleWebsocketRequest() servemux.HandlerFunc[any] {
 			conn.Close()
 		}()
 		// Register Device
-		if err := a.logic.RegisterDevice(ctx.Context(), deviceIdentity.Id, conn); err != nil {
+		wsCtx, err := a.logic.RegisterDevice(ctx.Context(), deviceIdentity.Id, conn)
+		if err != nil {
 			a.logger.Errorf("failed to register device - %v", err)
 			return
 		}
 		// Handle requests on Websocket interface
-		for {
-			if err := a.logic.HandleWebsocketRequest(ctx.Context(), deviceIdentity.Id); err != nil {
-				a.logger.Errorf("Websocket request failed: %v", err)
-				break
-			}
-			// handle next request
-		}
+		<-wsCtx.Done()
 	}
 }

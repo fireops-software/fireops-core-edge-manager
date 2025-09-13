@@ -15,7 +15,7 @@ type WsRequestClient struct {
 	stop            context.CancelFunc
 	pendingRequests map[string]chan async.ActionResult[IResponse]
 	requestCh       chan IRequest
-	mux             sync.RWMutex
+	mux             *sync.RWMutex
 }
 
 func (w *WsRequestClient) Send(req IRequest) chan async.ActionResult[IResponse] {
@@ -116,6 +116,10 @@ func (w *WsRequestClient) Close() error {
 	return nil
 }
 
+func (w *WsRequestClient) Context() context.Context {
+	return w.ctx
+}
+
 func (w *WsRequestClient) writeWs() {
 	for {
 		select {
@@ -151,7 +155,7 @@ func NewWsRequestClient(appCtx context.Context, conn *websocket.Conn) *WsRequest
 		stop:            cancel,
 		pendingRequests: map[string]chan async.ActionResult[IResponse]{},
 		requestCh:       make(chan IRequest, 50),
-		mux:             sync.RWMutex{},
+		mux:             &sync.RWMutex{},
 	}
 	go client.readWs()
 	go client.writeWs()
