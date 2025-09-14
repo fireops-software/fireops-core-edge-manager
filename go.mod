@@ -4,11 +4,13 @@ go 1.24.4
 
 require (
 	github.com/gorilla/websocket v1.5.3
-	github.com/uoul/go-common v0.3.6
+	github.com/uoul/go-common v0.3.7
 )
 
+require gotest.tools/v3 v3.5.2 // indirect
+
 require (
-	github.com/docker/docker v28.4.0+incompatible // indirect
+	github.com/docker/docker v28.4.0+incompatible
 	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/google/uuid v1.6.0

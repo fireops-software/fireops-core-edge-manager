@@ -14,6 +14,11 @@ func (f *FireOpsApi) GetDeviceIdentityForToken(ctx context.Context, token string
 	r := make(chan async.ActionResult[domain.DeviceIdentity])
 	go func() {
 		// TODO: Implement API-Call for token validation
+		r <- async.ActionResult[domain.DeviceIdentity]{
+			Result: domain.DeviceIdentity{
+				Id: "1",
+			},
+		}
 	}()
 	return r
 }

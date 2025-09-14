@@ -6,21 +6,27 @@ import (
 	"github.com/fireops-software/fireops-core-edge-manager/api/dto"
 	appError "github.com/fireops-software/fireops-core-edge-manager/error"
 	"github.com/uoul/go-common/collections"
+	"github.com/uoul/go-common/log"
 	"github.com/uoul/go-common/servemux"
 )
 
 const (
-	HEADER_API_KEY = "API-Key"
+	HEADER_API_KEY = "Api-Key"
 )
 
-func useErrorTranslation[T any]() servemux.HandlerFunc[T] {
+func useErrorTranslation[T any](logger log.ILogger) servemux.HandlerFunc[T] {
 	return func(ctx *servemux.HttpCtx[T]) {
 		for _, err := range ctx.Errors() {
+			logger.Error(err.Error())
 			switch err.(type) {
 			case appError.ErrNotFound:
 				ctx.AbortWithResponse(http.StatusNotFound, dto.NewErrorResponse(err))
 			case appError.ErrUnauthorized:
 				ctx.AbortWithResponse(http.StatusUnauthorized, dto.NewErrorResponse(err))
+			case appError.ErrConflict:
+				ctx.AbortWithResponse(http.StatusConflict, dto.NewErrorResponse(err))
+			case appError.ErrChannelClosed, appError.ErrNetwork:
+				ctx.AbortWithResponse(http.StatusServiceUnavailable, dto.NewErrorResponse(err))
 			case appError.ErrNotImplemented:
 				ctx.AbortWithResponse(http.StatusNotImplemented, dto.NewErrorResponse(err))
 			default:

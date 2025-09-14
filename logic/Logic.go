@@ -27,6 +27,7 @@ type Logic struct {
 
 // RegisterDevice implements ILogic.
 func (l *Logic) RegisterDevice(ctx context.Context, deviceId string, conn *websocket.Conn) (context.Context, error) {
+	l.logger.Debugf("RegisterDevice(%s)...", deviceId)
 	// Lock to prevent inconsistency
 	l.mux.Lock()
 	defer l.mux.Unlock()
@@ -45,6 +46,7 @@ func (l *Logic) RegisterDevice(ctx context.Context, deviceId string, conn *webso
 
 // UnRegisterDevice implements ILogic.
 func (l *Logic) UnRegisterDevice(ctx context.Context, deviceId string) error {
+	l.logger.Debugf("UnRegisterDevice(%s)...", deviceId)
 	// Lock to prevent inconsistency
 	l.mux.Lock()
 	defer l.mux.Unlock()
@@ -61,12 +63,14 @@ func (l *Logic) UnRegisterDevice(ctx context.Context, deviceId string) error {
 
 // GetDeviceIdentityFromToken implements ILogic.
 func (l *Logic) GetDeviceIdentityFromToken(ctx context.Context, token string) (domain.DeviceIdentity, error) {
+	l.logger.Debugf("GetDeviceIdentityFromToken(%s)...", token)
 	identity := <-l.fireOpsApi.GetDeviceIdentityForToken(ctx, token)
 	return identity.Result, identity.Error
 }
 
 // DeleteAllContainers implements ILogic.
 func (l *Logic) DeleteAllContainers(ctx context.Context, deviceId string) error {
+	l.logger.Debugf("DeleteAllContainers(%s)...", deviceId)
 	_, err := doWsRequest[any](
 		l.devices,
 		deviceId,
@@ -81,6 +85,7 @@ func (l *Logic) DeleteAllContainers(ctx context.Context, deviceId string) error 
 
 // DeployContainers implements ILogic.
 func (l *Logic) DeployContainers(ctx context.Context, deviceId string, containerConfig []domain.ServiceDefinition) ([]container.Summary, error) {
+	l.logger.Debugf("DeployContainers(%s): %v", deviceId, containerConfig)
 	return doWsRequest[[]container.Summary](
 		l.devices,
 		deviceId,
@@ -94,6 +99,7 @@ func (l *Logic) DeployContainers(ctx context.Context, deviceId string, container
 
 // GetAgentVersion implements ILogic.
 func (l *Logic) GetDeviceVersion(ctx context.Context, deviceId string) (domain.DeviceVersion, error) {
+	l.logger.Debugf("GetDeviceVersion(%s)...", deviceId)
 	return doWsRequest[domain.DeviceVersion](
 		l.devices,
 		deviceId,
@@ -107,6 +113,7 @@ func (l *Logic) GetDeviceVersion(ctx context.Context, deviceId string) (domain.D
 
 // GetContainerLogs implements ILogic.
 func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, containerId string, len uint) ([]domain.ContainerLogEntry, error) {
+	l.logger.Debugf("GetContainerLogs(%s)...", deviceId)
 	return doWsRequest[[]domain.ContainerLogEntry](
 		l.devices,
 		deviceId,
@@ -123,6 +130,7 @@ func (l *Logic) GetContainerLogs(ctx context.Context, deviceId string, container
 
 // GetContainers implements ILogic.
 func (l *Logic) GetContainers(ctx context.Context, deviceId string) ([]container.Summary, error) {
+	l.logger.Debugf("GetContainers(%s)...", deviceId)
 	return doWsRequest[[]container.Summary](
 		l.devices,
 		deviceId,
@@ -158,6 +166,7 @@ func NewLogic(logger log.ILogger, opts ...func(*Logic)) ILogic {
 		logger:     logger,
 		fireOpsApi: dal.NewFireOpsApi(),
 		mux:        sync.Mutex{},
+		devices:    map[string]ws.WsRequestClient{},
 
 		wsTimeout: 300 * time.Second,
 	}

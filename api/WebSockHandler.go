@@ -22,7 +22,8 @@ var upgrader = websocket.Upgrader{
 func (a *Api) handleWebsocketRequest() servemux.HandlerFunc[any] {
 	return func(ctx *servemux.HttpCtx[any]) {
 		// Check token
-		apiKeys := ctx.GetHeader("API-Key")
+		a.logger.Infof("%v", ctx.GetRawRequest().Header)
+		apiKeys := ctx.GetHeader("Api-Key")
 		if len(apiKeys) != 1 {
 			ctx.Error(appError.NewErrUnauthorized("no api key present in API-Key header"))
 			return

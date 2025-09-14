@@ -33,7 +33,7 @@ func (a *Api) registerDeviceEnpoints(mux *http.ServeMux) {
 	mux.HandleFunc(fmt.Sprintf("%s/ws", API_BASE_URI), servemux.Handle(
 		servemux.NewHandlerConfig(),
 		a.handleWebsocketRequest(),
-		useErrorTranslation[any](),
+		useErrorTranslation[any](a.logger),
 	))
 	// GET current agent's version
 	mux.HandleFunc(fmt.Sprintf("GET %s/devices/{deviceId}/version", API_BASE_URI), servemux.Handle(
@@ -66,7 +66,7 @@ func defaultChain[T any](api *Api, handler servemux.HandlerFunc[T]) []servemux.H
 	return []servemux.HandlerFunc[T]{
 		useApiKey[T](api.apiKeys),
 		handler,
-		useErrorTranslation[T](),
+		useErrorTranslation[T](api.logger),
 	}
 }
 
@@ -76,10 +76,11 @@ func WithApiKeys(keys []string) func(*Api) {
 	}
 }
 
-func NewApi(logger log.ILogger, opts ...func(*Api)) *Api {
+func NewApi(logger log.ILogger, logic logic.ILogic, opts ...func(*Api)) *Api {
 	a := &Api{
 		logger:  logger,
 		apiKeys: []string{},
+		logic:   logic,
 	}
 	for _, o := range opts {
 		o(a)
