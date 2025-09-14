@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
@@ -153,6 +154,8 @@ func doWsRequest[T any](devices map[string]ws.WsRequestClient, deviceId string, 
 	if resp.Error != nil {
 		return *new(T), resp.Error
 	}
+	j, _ := json.Marshal(resp.Result.GetBody())
+	fmt.Println(string(j))
 	// Convert Response
 	respBody := *new(T)
 	if err := json.Unmarshal(resp.Result.GetBody(), &respBody); err != nil {

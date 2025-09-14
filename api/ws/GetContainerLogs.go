@@ -7,6 +7,4 @@ type GetContainerLogsRequest struct {
 	Len         uint
 }
 
-type GetContainerLogsResponse struct {
-	LogEntries []domain.ContainerLogEntry
-}
+type GetContainerLogsResponse []domain.ContainerLogEntry
