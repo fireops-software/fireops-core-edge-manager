@@ -19,13 +19,13 @@ type Api struct {
 	apiKeys []string
 }
 
-func (a *Api) Run(port uint16) error {
+func (a *Api) Run(listen string) error {
 	// Create serve mux
 	mux := http.NewServeMux()
 	// Register Handlers
 	a.registerDeviceEnpoints(mux)
 	// Run HTTP Server
-	return http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
+	return http.ListenAndServe(listen, mux)
 }
 
 func (a *Api) registerDeviceEnpoints(mux *http.ServeMux) {

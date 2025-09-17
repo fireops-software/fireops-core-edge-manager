@@ -45,7 +45,7 @@ func main() {
 		api.WithApiKeys(apiKeys),
 	)
 	// Run Api
-	port := cp.UInt16OrDefault("API_PORT", 80)
-	logger.Infof("Api running on port %d", port)
-	restApi.Run(port)
+	listen := cp.StringOrDefault("API_INTERFACE", ":80")
+	logger.Infof("Api running on %s", listen)
+	restApi.Run(listen)
 }
