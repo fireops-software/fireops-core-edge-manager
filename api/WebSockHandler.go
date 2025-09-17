@@ -22,7 +22,6 @@ var upgrader = websocket.Upgrader{
 func (a *Api) handleWebsocketRequest() servemux.HandlerFunc[any] {
 	return func(ctx *servemux.HttpCtx[any]) {
 		// Check token
-		a.logger.Infof("%v", ctx.GetRawRequest().Header)
 		apiKeys := ctx.GetHeader("Api-Key")
 		if len(apiKeys) != 1 {
 			ctx.Error(appError.NewErrUnauthorized("no api key present in API-Key header"))
@@ -30,7 +29,7 @@ func (a *Api) handleWebsocketRequest() servemux.HandlerFunc[any] {
 		}
 		deviceIdentity, err := a.logic.GetDeviceIdentityFromToken(ctx.Context(), apiKeys[0])
 		if err != nil {
-			ctx.Error(appError.NewErrUnauthorized("token validation failed"))
+			ctx.Error(appError.NewErrUnauthorized("token validation failed - %v", err))
 			return
 		}
 		// Upgrade Websocke connection

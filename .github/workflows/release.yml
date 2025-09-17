@@ -1,0 +1,86 @@
+
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+      
+permissions:
+  contents: write    # Required for creating releases
+  actions: read      # Required for workflow access
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.25'
+    
+    - name: Replace single file
+      uses: richardrigutins/replace-in-files@v2
+      with:
+        files: 'main.go'
+        search-text: '{VERSION}'
+        replacement-text: ${{ vars.VERSION }}
+
+    - name: Get dependencies
+      run: go mod download
+
+    - name: Build for Linux(amd64)
+      run: |
+        GOOS=linux GOARCH=amd64 go build -o build/fireops-device-manager-linux-amd64 .
+
+    - name: Build for Linux(arm64)
+      run: |
+        GOOS=linux GOARCH=arm64 go build -o build/fireops-device-manager-linux-arm64 .
+
+    - name: Build for Linux(arm/v7)
+      run: |
+        GOOS=linux GOARCH=arm GOARM=7 go build -o build/fireops-device-manager-linux-armv7 .
+
+    - name: Build for Windows
+      run: |
+        GOOS=windows GOARCH=amd64 go build -o build/fireops-device-manager-windows-amd64.exe .
+
+    - name: Build for macOS (Intel)
+      run: |
+        GOOS=darwin GOARCH=amd64 go build -o build/fireops-device-manager-darwin-amd64 .
+
+    - name: Build for macOS (Apple Silicon)
+      run: |
+        GOOS=darwin GOARCH=arm64 go build -o build/fireops-device-manager-darwin-arm64 .
+
+    - name: Create checksums
+      run: |
+        cd build
+        sha256sum * > checksums.txt
+    
+    - name: Create git tag
+      run: |
+        git tag ${{ vars.VERSION }}
+
+    - name: Push git tag
+      run: |
+        git push origin ${{ vars.VERSION }}
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: ${{ vars.VERSION }}
+        files: |
+          build/fireops-device-manager-linux-amd64
+          build/fireops-device-manager-linux-arm64
+          build/fireops-device-manager-linux-armv7
+          build/fireops-device-manager-windows-amd64.exe
+          build/fireops-device-manager-darwin-amd64
+          build/fireops-device-manager-darwin-arm64
+          build/checksums.txt
+        generate_release_notes: true

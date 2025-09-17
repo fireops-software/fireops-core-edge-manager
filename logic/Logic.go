@@ -164,10 +164,10 @@ func doWsRequest[T any](devices map[string]ws.WsRequestClient, deviceId string, 
 	return respBody, nil
 }
 
-func NewLogic(logger log.ILogger, opts ...func(*Logic)) ILogic {
+func NewLogic(logger log.ILogger, fireopsApi dal.IFireOpsApi, opts ...func(*Logic)) ILogic {
 	l := &Logic{
 		logger:     logger,
-		fireOpsApi: dal.NewFireOpsApi(),
+		fireOpsApi: fireopsApi,
 		mux:        sync.Mutex{},
 		devices:    map[string]ws.WsRequestClient{},
 

@@ -56,3 +56,17 @@ func useApiKey[T any](validKeys []string) servemux.HandlerFunc[T] {
 		}
 	}
 }
+
+func useContentTypeApplicationJson[T any]() servemux.HandlerFunc[T] {
+	return func(ctx *servemux.HttpCtx[T]) {
+		typeHeaders := ctx.GetHeader("Content-Type")
+		if len(typeHeaders) != 1 {
+			ctx.AbortWithResponse(http.StatusBadRequest, dto.NewErrorResponse(appError.NewErrDataParsing("no Content-Type header present")))
+			return
+		}
+		if typeHeaders[0] != "application/json" {
+			ctx.AbortWithResponse(http.StatusBadRequest, dto.NewErrorResponse(appError.NewErrDataParsing("Content-Type application/json is required")))
+			return
+		}
+	}
+}

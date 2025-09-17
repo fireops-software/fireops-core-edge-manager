@@ -14,7 +14,8 @@
       "env": {
         "LOG_LEVEL": "TRACE",
         "API_KEYS": "asdf",
-        "API_PORT": "8080"
+        "API_PORT": "8080",
+        "FIREOPS_BASE_URL": "https://einsatz.bfk-perg.at"
       }
     }
   ]

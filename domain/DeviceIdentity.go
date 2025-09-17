@@ -1,5 +1,5 @@
 package domain
 
 type DeviceIdentity struct {
-	Id string
+	Id string `json:"token_id"`
 }

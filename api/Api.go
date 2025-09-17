@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	API_BASE_URI = "/edge/api/v1"
+	API_BASE_URI = "/api/v1"
 )
 
 type Api struct {
@@ -64,6 +64,7 @@ func (a *Api) registerDeviceEnpoints(mux *http.ServeMux) {
 
 func defaultChain[T any](api *Api, handler servemux.HandlerFunc[T]) []servemux.HandlerFunc[T] {
 	return []servemux.HandlerFunc[T]{
+		useContentTypeApplicationJson[T](),
 		useApiKey[T](api.apiKeys),
 		handler,
 		useErrorTranslation[T](api.logger),
