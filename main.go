@@ -47,5 +47,7 @@ func main() {
 	// Run Api
 	listen := cp.StringOrDefault("API_INTERFACE", ":80")
 	logger.Infof("Api running on %s", listen)
-	restApi.Run(listen)
+	if err := restApi.Run(listen); err != nil {
+		logger.Errorf("failed to run api - %v", err)
+	}
 }
