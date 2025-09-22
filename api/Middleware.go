@@ -25,7 +25,7 @@ func useErrorTranslation[T any](logger log.ILogger) servemux.HandlerFunc[T] {
 				ctx.AbortWithResponse(http.StatusUnauthorized, dto.NewErrorResponse(err))
 			case appError.ErrConflict:
 				ctx.AbortWithResponse(http.StatusConflict, dto.NewErrorResponse(err))
-			case appError.ErrChannelClosed, appError.ErrNetwork:
+			case appError.ErrChannelClosed, appError.ErrNetwork, appError.ErrAgent:
 				ctx.AbortWithResponse(http.StatusServiceUnavailable, dto.NewErrorResponse(err))
 			case appError.ErrNotImplemented:
 				ctx.AbortWithResponse(http.StatusNotImplemented, dto.NewErrorResponse(err))

@@ -1,11 +1,15 @@
 package ws
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	appError "github.com/fireops-software/fireops-core-edge-manager/error"
+)
 
 type Response[T any] struct {
 	MsgId   string
 	MsgType string
-	Error   error
+	Error   *string
 	Body    T
 }
 
@@ -17,7 +21,10 @@ func (r *Response[T]) GetBody() json.RawMessage {
 
 // GetError implements IResponse.
 func (r *Response[T]) GetError() error {
-	return r.Error
+	if r.Error != nil {
+		return appError.NewErrAgent("%s", *r.Error)
+	}
+	return nil
 }
 
 // GetMsgId implements IResponse.
@@ -31,10 +38,15 @@ func (r *Response[T]) GetMsgType() string {
 }
 
 func NewResponse[T any](msgId string, msgType string, body T, err error) IResponse {
+	var errStr *string
+	if err != nil {
+		str := err.Error()
+		errStr = &str
+	}
 	return &Response[T]{
 		MsgId:   msgId,
 		MsgType: msgType,
 		Body:    body,
-		Error:   err,
+		Error:   errStr,
 	}
 }
