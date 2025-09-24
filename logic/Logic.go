@@ -3,6 +3,8 @@ package logic
 import (
 	"context"
 	"encoding/json"
+	"maps"
+	"slices"
 	"sync"
 	"time"
 
@@ -23,6 +25,18 @@ type Logic struct {
 	mux        sync.Mutex
 	wsTimeout  time.Duration
 	devices    map[string]ws.WsRequestClient
+}
+
+// GetConnectedDevices implements ILogic.
+func (l *Logic) GetConnectedDevices(ctx context.Context) ([]string, error) {
+	l.logger.Debugf("GetConnectedDevices...")
+	l.mux.Lock()
+	devices := slices.Collect(maps.Keys(l.devices))
+	l.mux.Unlock()
+	if devices == nil {
+		return []string{}, nil
+	}
+	return devices, nil
 }
 
 // RegisterDevice implements ILogic.

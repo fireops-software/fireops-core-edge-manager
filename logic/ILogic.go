@@ -14,6 +14,7 @@ type ILogic interface {
 	RegisterDevice(ctx context.Context, deviceId string, conn *websocket.Conn) (context.Context, error)
 	UnRegisterDevice(ctx context.Context, deviceId string) error
 	// REST Api
+	GetConnectedDevices(ctx context.Context) ([]string, error)
 	GetDeviceVersion(ctx context.Context, deviceId string) (domain.DeviceVersion, error)
 	GetContainers(ctx context.Context, deviceId string) ([]container.Summary, error)
 	DeployContainers(ctx context.Context, deviceId string, containerConfig []domain.ServiceDefinition) ([]container.Summary, error)

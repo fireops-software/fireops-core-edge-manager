@@ -8,6 +8,18 @@ import (
 	"github.com/uoul/go-common/servemux"
 )
 
+// Get connected devices
+func (a *Api) getConnectedDevices() servemux.HandlerFunc[any] {
+	return func(ctx *servemux.HttpCtx[any]) {
+		devices, err := a.logic.GetConnectedDevices(ctx.Context())
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+		ctx.SetResponseBody(devices)
+	}
+}
+
 // GET current agent's version
 func (a *Api) getDeviceVersion() servemux.HandlerFunc[any] {
 	return func(ctx *servemux.HttpCtx[any]) {

@@ -35,6 +35,11 @@ func (a *Api) registerDeviceEnpoints(mux *http.ServeMux) {
 		a.handleWebsocketRequest(),
 		useErrorTranslation[any](a.logger),
 	))
+	// GET connected devices
+	mux.HandleFunc(fmt.Sprintf("GET %s/devices", API_BASE_URI), servemux.Handle(
+		servemux.NewHandlerConfig(),
+		defaultChain(a, a.getConnectedDevices())...,
+	))
 	// GET current agent's version
 	mux.HandleFunc(fmt.Sprintf("GET %s/devices/{deviceId}/version", API_BASE_URI), servemux.Handle(
 		servemux.NewHandlerConfig(),
